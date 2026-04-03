@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GD Lotto 4D Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  body { background: #0f0f23; min-height: 100vh; }
+  .gold-gradient { background: linear-gradient(135deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .card-glow { border: 1px solid rgba(255,215,0,0.2); box-shadow: 0 0 20px rgba(255,215,0,0.05); }
+  .prize-ball { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; }
+  .ball-1st { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; }
+  .ball-2nd { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); color: #000; }
+  .ball-3rd { background: linear-gradient(135deg, #CD7F32, #A0522D); color: #fff; }
+  .hot-bar { background: linear-gradient(90deg, #ef4444, #f97316); border-radius: 4px; height: 24px; transition: width 0.5s; }
+  .cold-bar { background: linear-gradient(90deg, #3b82f6, #06b6d4); border-radius: 4px; height: 24px; transition: width 0.5s; }
+  .tab-active { border-bottom: 3px solid #FFD700; color: #FFD700; }
+  .number-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 8px; }
+  .num-chip { padding: 6px 10px; border-radius: 8px; text-align: center; font-weight: 700; font-size: 0.9rem; }
+  @keyframes pulse-gold { 0%,100% { box-shadow: 0 0 5px rgba(255,215,0,0.3); } 50% { box-shadow: 0 0 20px rgba(255,215,0,0.6); } }
+  .pulse-gold { animation: pulse-gold 2s infinite; }
+</style>
+</head>
+<body class="p-4 md:p-8">
+
+<div class="max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="text-center mb-8">
+    <h1 class="text-4xl md:text-5xl font-black gold-gradient mb-2">🎰 GD Lotto 4D</h1>
+    <p class="text-gray-400">Live Dashboard — AI-Powered Predictions & Analysis</p>
+    <p class="text-gray-500 text-sm mt-1">Last updated: <span id="lastUpdated">Loading...</span> • <span id="totalDraws">0</span> draws analyzed</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex justify-center gap-6 mb-8 border-b border-gray-700 pb-2">
+    <button onclick="showTab('results')" id="tab-results" class="tab-active px-4 py-2 font-bold text-lg transition-all">🏆 Results</button>
+    <button onclick="showTab('predictions')" id="tab-predictions" class="px-4 py-2 font-bold text-lg text-gray-400 hover:text-white transition-all">✨ Predictions</button>
+    <button onclick="showTab('analysis')" id="tab-analysis" class="px-4 py-2 font-bold text-lg text-gray-400 hover:text-white transition-all">📊 Analysis</button>
+  </div>
+
+  <!-- Results Tab -->
+  <div id="panel-results">
+    <div class="card card-glow bg-base-200 mb-6 p-6">
+      <h2 class="text-2xl font-bold mb-4 text-white">Latest Draw</h2>
+      <div id="latestDraw" class="flex flex-wrap gap-6 justify-center items-center mb-6"></div>
+      <div id="specialConsolation" class="grid md:grid-cols-2 gap-6"></div>
+    </div>
+    <div class="card card-glow bg-base-200 p-6">
+      <h2 class="text-2xl font-bold mb-4 text-white">Recent Draws</h2>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra w-full">
+          <thead><tr><th>Date</th><th>1st 🥇</th><th>2nd 🥈</th><th>3rd 🥉</th></tr></thead>
+          <tbody id="recentTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Predictions Tab -->
+  <div id="panel-predictions" class="hidden">
+    <div id="predictionCards" class="grid md:grid-cols-3 gap-6"></div>
+  </div>
+
+  <!-- Analysis Tab -->
+  <div id="panel-analysis" class="hidden">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card card-glow bg-base-200 p-6">
+        <h2 class="text-xl font-bold mb-4 text-red-400">🔥 Hot Numbers</h2>
+        <div id="hotNumbers"></div>
+      </div>
+      <div class="card card-glow bg-base-200 p-6">
+        <h2 class="text-xl font-bold mb-4 text-blue-400">❄️ Cold Numbers</h2>
+        <div id="coldNumbers"></div>
+      </div>
+    </div>
+    <div class="card card-glow bg-base-200 p-6 mt-6">
+      <h2 class="text-xl font-bold mb-4 text-white">📈 Frequency Chart</h2>
+      <canvas id="freqChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="text-center mt-10 text-gray-600 text-xs">
+    <p>⚠️ For entertainment purposes only. Lottery is random — play responsibly.</p>
+    <p class="mt-1">Powered by AI prediction engine • Auto-updates daily at 8 PM MYT</p>
+  </div>
+</div>
+
+<script>
+let DATA = {};
+
+async function loadData() {
+  const resp = await fetch('data.json?t=' + Date.now());
+  DATA = await resp.json();
+  render();
+}
+
+function showTab(tab) {
+  ['results','predictions','analysis'].forEach(t => {
+    document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
+    const btn = document.getElementById('tab-' + t);
+    btn.classList.toggle('tab-active', t === tab);
+    btn.classList.toggle('text-gray-400', t !== tab);
+  });
+}
+
+function render() {
+  document.getElementById('lastUpdated').textContent = DATA.lastUpdated || 'N/A';
+  document.getElementById('totalDraws').textContent = DATA.totalDraws || 0;
+  renderLatest();
+  renderRecent();
+  renderPredictions();
+  renderAnalysis();
+}
+
+function renderLatest() {
+  const r = DATA.latestResults?.[0];
+  if (!r) return;
+  const el = document.getElementById('latestDraw');
+  el.innerHTML = `
+    <div class="text-center">
+      <div class="text-xs text-gray-400 mb-1">📅 ${r.draw_date}</div>
+      <div class="text-xs text-gray-500">Draw #${r.draw_number || ''}</div>
+    </div>
+    <div class="text-center">
+      <div class="text-xs text-gray-400 mb-2">1st Prize</div>
+      <div class="prize-ball ball-1st pulse-gold mx-auto text-xl">${r.prize_1st}</div>
+    </div>
+    <div class="text-center">
+      <div class="text-xs text-gray-400 mb-2">2nd Prize</div>
+      <div class="prize-ball ball-2nd mx-auto text-xl">${r.prize_2nd}</div>
+    </div>
+    <div class="text-center">
+      <div class="text-xs text-gray-400 mb-2">3rd Prize</div>
+      <div class="prize-ball ball-3rd mx-auto text-xl">${r.prize_3rd}</div>
+    </div>
+  `;
+
+  const sc = document.getElementById('specialConsolation');
+  const specials = [r.special_1,r.special_2,r.special_3,r.special_4,r.special_5,r.special_6,r.special_7,r.special_8,r.special_9,r.special_10].filter(Boolean);
+  const consols = [r.consolation_1,r.consolation_2,r.consolation_3,r.consolation_4,r.consolation_5,r.consolation_6,r.consolation_7,r.consolation_8,r.consolation_9,r.consolation_10].filter(Boolean);
+  sc.innerHTML = `
+    <div>
+      <h3 class="text-sm font-bold text-yellow-400 mb-2">⭐ Special</h3>
+      <div class="number-grid">${specials.map(n => `<div class="num-chip bg-yellow-900/40 text-yellow-300">${n}</div>`).join('')}</div>
+    </div>
+    <div>
+      <h3 class="text-sm font-bold text-gray-400 mb-2">🎯 Consolation</h3>
+      <div class="number-grid">${consols.map(n => `<div class="num-chip bg-gray-700/50 text-gray-300">${n}</div>`).join('')}</div>
+    </div>
+  `;
+}
+
+function renderRecent() {
+  const tb = document.getElementById('recentTable');
+  tb.innerHTML = DATA.latestResults.slice(0, 20).map(r => `
+    <tr><td>${r.draw_date}</td><td class="font-bold text-yellow-400">${r.prize_1st}</td><td class="font-bold text-gray-300">${r.prize_2nd}</td><td class="font-bold text-orange-400">${r.prize_3rd}</td></tr>
+  `).join('');
+}
+
+function renderPredictions() {
+  const el = document.getElementById('predictionCards');
+  const icons = {'hot_frequency_fusion':'🔥','overdue_reverse_engineering':'⏰','positional_markov_hybrid':'🧮'};
+  const colors = {'hot_frequency_fusion':'from-red-900/40 to-orange-900/40','overdue_reverse_engineering':'from-purple-900/40 to-blue-900/40','positional_markov_hybrid':'from-green-900/40 to-teal-900/40'};
+  const borderColors = {'hot_frequency_fusion':'border-red-500/30','overdue_reverse_engineering':'border-purple-500/30','positional_markov_hybrid':'border-green-500/30'};
+
+  if (!DATA.predictions?.length) {
+    el.innerHTML = '<p class="text-gray-400 col-span-3 text-center">No predictions available yet.</p>';
+    return;
+  }
+
+  el.innerHTML = DATA.predictions.map(p => {
+    const nums = (p.predicted_numbers || '').split(',').map(n=>n.trim());
+    const icon = icons[p.strategy] || '🎲';
+    const bg = colors[p.strategy] || 'from-gray-900/40 to-gray-800/40';
+    const bc = borderColors[p.strategy] || 'border-gray-500/30';
+    const name = (p.strategy || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const confidence = p.confidence_score ? (p.confidence_score * 100).toFixed(0) : '?';
+    return `
+      <div class="card bg-gradient-to-br ${bg} border ${bc} p-6">
+        <h3 class="text-lg font-bold mb-1">${icon} ${name}</h3>
+        <div class="text-xs text-gray-400 mb-1">For: ${p.prediction_date || 'Next draw'}</div>
+        <div class="badge badge-sm badge-outline mb-3">Confidence: ${confidence}%</div>
+        <div class="number-grid">
+          ${nums.map(n => `<div class="num-chip bg-white/10 text-white font-mono">${n}</div>`).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAnalysis() {
+  const maxHot = Math.max(...DATA.hotNumbers.map(h => h.cnt));
+  const maxCold = Math.max(...DATA.coldNumbers.map(c => c.cnt));
+
+  document.getElementById('hotNumbers').innerHTML = DATA.hotNumbers.slice(0,10).map(h => `
+    <div class="flex items-center gap-3 mb-2">
+      <span class="font-mono font-bold text-white w-12">${h.num}</span>
+      <div class="flex-1"><div class="hot-bar" style="width:${(h.cnt/maxHot*100)}%"></div></div>
+      <span class="text-gray-400 text-sm w-8">${h.cnt}×</span>
+    </div>
+  `).join('');
+
+  document.getElementById('coldNumbers').innerHTML = DATA.coldNumbers.slice(0,10).map(c => `
+    <div class="flex items-center gap-3 mb-2">
+      <span class="font-mono font-bold text-white w-12">${c.num}</span>
+      <div class="flex-1"><div class="cold-bar" style="width:${Math.max(c.cnt/maxCold*100, 10)}%"></div></div>
+      <span class="text-gray-400 text-sm w-8">${c.cnt}×</span>
+    </div>
+  `).join('');
+
+  // Chart
+  const ctx = document.getElementById('freqChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: DATA.hotNumbers.map(h => h.num),
+      datasets: [{
+        label: 'Appearances (Top 20)',
+        data: DATA.hotNumbers.map(h => h.cnt),
+        backgroundColor: DATA.hotNumbers.map((_, i) => `hsla(${i * 9}, 80%, 55%, 0.7)`),
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { color: '#9ca3af' } } },
+      scales: {
+        x: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+loadData();
+</script>
+</body>
+</html>
