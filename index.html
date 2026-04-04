@@ -3,278 +3,291 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GD Lotto 4D Dashboard</title>
+<title>GD Lotto 4D Predictor v2.0</title>
 <style>
+:root{--neon-purple:#a855f7;--neon-blue:#6366f1;--neon-pink:#ec4899;--dark-bg:#0f0a1a;--card-bg:#1a1128;--card-border:#2d1f4e;--glow-purple:0 0 15px rgba(168,85,247,0.3)}
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--neon:#a855f7;--neon2:#c084fc;--bg:#0f0a1a;--card:#1a1025;--card2:#241535;--border:#2d1f45;--text:#e2d9f3;--muted:#9b8bb8;--green:#22c55e;--red:#ef4444;--gold:#fbbf24;--silver:#94a3b8;--bronze:#d97706}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.container{max-width:900px;margin:0 auto;padding:16px}
-h1{text-align:center;font-size:1.8rem;background:linear-gradient(135deg,var(--neon),var(--neon2),#e879f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
-.subtitle{text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:20px}
-.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
-.tab{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:.85rem;transition:all .2s}
-.tab:hover{border-color:var(--neon);color:var(--text)}
-.tab.active{background:linear-gradient(135deg,rgba(168,85,247,.3),rgba(192,132,252,.2));border-color:var(--neon);color:#fff;box-shadow:0 0 12px rgba(168,85,247,.3)}
+body{background:var(--dark-bg);color:#e2d9f3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+.app{max-width:640px;margin:0 auto;padding:16px;background:linear-gradient(180deg,#0f0a1a,#1a0e2e);min-height:100vh}
+.header{text-align:center;padding:16px;background:linear-gradient(135deg,#1e1338,#2a1548);border-radius:16px;border:1px solid var(--card-border);box-shadow:var(--glow-purple);margin-bottom:20px}
+.header h1{font-size:1.4rem;font-weight:800;background:linear-gradient(90deg,#a855f7,#6366f1,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header .sub{font-size:.8rem;color:#9580b8;margin-top:4px}
+.stats{display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);border-radius:12px;font-size:.65rem;color:#b8a4d6}
+.pill b{color:#c4b5fd}
+.tabs{display:flex;gap:2px;margin-bottom:16px;background:#1a1128;border-radius:12px;padding:3px;border:1px solid var(--card-border);overflow-x:auto}
+.tab{flex:1;display:flex;align-items:center;justify-content:center;gap:2px;padding:8px 4px;border-radius:10px;border:none;background:transparent;color:#7c6a9e;font-size:.6rem;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
+.tab:hover{color:#b8a4d6;background:rgba(168,85,247,.1)}
+.tab.active{background:linear-gradient(135deg,rgba(168,85,247,.3),rgba(99,102,241,.3));color:#e9e0ff;box-shadow:var(--glow-purple)}
 .panel{display:none}.panel.active{display:block}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
-.card:hover{border-color:rgba(168,85,247,.4);box-shadow:0 0 20px rgba(168,85,247,.1)}
-.card h3{color:var(--neon2);font-size:1rem;margin-bottom:8px}
-.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;margin-left:6px}
-.badge-freq{background:rgba(239,68,68,.2);color:#f87171}
-.badge-gap{background:rgba(251,191,36,.2);color:#fbbf24}
-.badge-pattern{background:rgba(34,197,94,.2);color:#4ade80}
-.desc{color:var(--muted);font-size:.78rem;margin-bottom:10px}
-.numbers{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.num{background:linear-gradient(135deg,#2d1f45,#1a1025);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-family:'Courier New',monospace;font-weight:700;font-size:1rem;color:#e2d9f3;text-align:center;min-width:56px;transition:all .2s}
-.num:hover{border-color:var(--neon);box-shadow:0 0 10px rgba(168,85,247,.4);transform:translateY(-2px)}
-.confidence{margin-top:8px;display:flex;align-items:center;gap:8px;font-size:.8rem}
-.conf-bar{flex:1;height:6px;background:#1a1025;border-radius:3px;overflow:hidden}
-.conf-fill{height:100%;border-radius:3px;transition:width .5s}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
-.stat-val{font-size:1.6rem;font-weight:700;background:linear-gradient(135deg,var(--neon),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.stat-label{color:var(--muted);font-size:.75rem;margin-top:4px}
-.prize{display:flex;align-items:center;gap:10px;padding:6px 0}
-.prize-label{font-size:.75rem;font-weight:600;min-width:28px}
-.prize-num{font-family:'Courier New',monospace;font-weight:700;font-size:1.1rem;padding:4px 12px;border-radius:6px;border:1px solid}
-.gold .prize-num{color:var(--gold);border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.1)}
-.silver .prize-num{color:var(--silver);border-color:rgba(148,163,184,.3);background:rgba(148,163,184,.1)}
-.bronze .prize-num{color:var(--bronze);border-color:rgba(217,119,6,.3);background:rgba(217,119,6,.1)}
-.special-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.special-num{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-family:'Courier New',monospace;font-size:.85rem;color:var(--muted)}
-.freq-item{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(45,31,69,.5)}
-.freq-num{font-family:'Courier New',monospace;font-weight:700;min-width:50px;font-size:.95rem}
-.freq-bar{flex:1;height:8px;background:#1a1025;border-radius:4px;overflow:hidden}
-.freq-fill{height:100%;border-radius:4px}
-.freq-fill.hot{background:linear-gradient(90deg,#ef4444,#f97316)}
-.freq-fill.cold{background:linear-gradient(90deg,#3b82f6,#06b6d4)}
-.freq-count{color:var(--muted);font-size:.8rem;min-width:30px;text-align:right}
-.section-title{color:var(--neon2);font-size:.9rem;font-weight:600;margin:12px 0 8px;display:flex;align-items:center;gap:6px}
-table{width:100%;border-collapse:collapse;font-size:.82rem}
-th{color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);font-weight:600;font-size:.75rem;text-transform:uppercase}
-td{padding:8px 6px;border-bottom:1px solid rgba(45,31,69,.3)}
-.match-badge{background:rgba(34,197,94,.2);color:#4ade80;padding:2px 6px;border-radius:4px;font-size:.7rem;font-weight:600}
-.no-match{color:var(--muted);font-size:.75rem}
+.card{background:linear-gradient(135deg,#1e1338,#231545);border:1px solid var(--card-border);border-radius:16px;padding:16px;margin-bottom:12px;transition:.2s}
+.card:hover{border-color:rgba(168,85,247,.5);box-shadow:var(--glow-purple)}
+.sname{font-size:.95rem;font-weight:700;color:#e9e0ff}
+.tag{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.65rem;font-weight:600;margin-top:4px}
+.tag-f{background:rgba(239,68,68,.2);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.tag-g{background:rgba(245,158,11,.2);color:#fcd34d;border:1px solid rgba(245,158,11,.3)}
+.tag-p{background:rgba(59,130,246,.2);color:#93c5fd;border:1px solid rgba(59,130,246,.3)}
+.tag-e{background:rgba(168,85,247,.2);color:#c4b5fd;border:1px solid rgba(168,85,247,.3)}
+.tag-m{background:rgba(34,197,94,.2);color:#86efac;border:1px solid rgba(34,197,94,.3)}
+.desc{font-size:.75rem;color:#9580b8;margin:6px 0 12px;line-height:1.4}
+.conf{margin-bottom:12px}.conf-top{display:flex;justify-content:space-between;font-size:.7rem;color:#9580b8;margin-bottom:4px}.conf-top b{color:#c4b5fd}
+.bar{width:100%;height:6px;background:rgba(168,85,247,.15);border-radius:3px;overflow:hidden}
+.fill{height:100%;border-radius:3px;transition:width .5s}
+.fh{background:linear-gradient(90deg,#22c55e,#4ade80);box-shadow:0 0 8px rgba(34,197,94,.4)}
+.fm{background:linear-gradient(90deg,#f59e0b,#fbbf24);box-shadow:0 0 8px rgba(245,158,11,.4)}
+.fl{background:linear-gradient(90deg,#ef4444,#f87171);box-shadow:0 0 8px rgba(239,68,68,.4)}
+.nums{display:flex;flex-wrap:wrap;gap:8px}
+.tile{min-width:50px;padding:8px 6px;text-align:center;font-family:'Courier New',monospace;font-weight:800;font-size:.95rem;border-radius:12px;background:linear-gradient(135deg,#2a1b4a,#1e1245);border:1px solid rgba(168,85,247,.3);color:#e9e0ff;transition:.2s}
+.tile:hover{transform:translateY(-2px);box-shadow:var(--glow-purple);border-color:var(--neon-purple)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(99,102,241,.2));border:1px solid rgba(168,85,247,.4);border-radius:20px;font-size:.8rem;font-weight:600;color:#c4b5fd;margin-bottom:16px}
+.date{font-size:.8rem;font-weight:700;color:#c4b5fd;display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.prize{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.prize-l{font-size:.7rem;font-weight:600;color:#9580b8;min-width:28px}
+.prize-n{font-family:'Courier New',monospace;font-weight:800;font-size:1.05rem;padding:4px 12px;border-radius:8px}
+.p1{background:linear-gradient(135deg,rgba(234,179,8,.25),rgba(251,191,36,.15));border:1px solid rgba(234,179,8,.4);color:#fde68a}
+.p2{background:linear-gradient(135deg,rgba(156,163,175,.25),rgba(209,213,219,.15));border:1px solid rgba(156,163,175,.4);color:#d1d5db}
+.p3{background:linear-gradient(135deg,rgba(180,83,9,.25),rgba(217,119,6,.15));border:1px solid rgba(180,83,9,.4);color:#fcd34d}
+.sec-label{font-size:.65rem;font-weight:600;color:#7c6a9e;text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px}
+.mini{display:flex;flex-wrap:wrap;gap:4px}
+.mt{padding:3px 8px;font-family:'Courier New',monospace;font-weight:700;font-size:.75rem;border-radius:6px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);color:#b8a4d6}
+.mt-g{background:rgba(234,179,8,.15)!important;border-color:rgba(234,179,8,.3)!important;color:#fde68a!important}
+.mt-m{background:rgba(34,197,94,.25)!important;border-color:rgba(34,197,94,.5)!important;color:#4ade80!important;box-shadow:0 0 8px rgba(34,197,94,.3)}
+.freq-r{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.freq-n{font-family:'Courier New',monospace;font-weight:800;font-size:.85rem;min-width:48px;text-align:center;padding:4px 8px;border-radius:8px;background:linear-gradient(135deg,#2a1b4a,#1e1245);border:1px solid rgba(168,85,247,.3);color:#e9e0ff}
+.freq-t{flex:1;height:8px;background:rgba(168,85,247,.1);border-radius:4px;overflow:hidden}
+.freq-fh{height:100%;border-radius:4px;background:linear-gradient(90deg,#ef4444,#f97316)}
+.freq-fc{height:100%;border-radius:4px;background:linear-gradient(90deg,#3b82f6,#06b6d4)}
+.freq-c{font-size:.7rem;font-weight:700;color:#9580b8;min-width:24px;text-align:right}
+.nm-sum{display:flex;align-items:center;gap:8px;padding:10px 16px;margin-bottom:12px;background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(168,85,247,.1));border:1px solid rgba(245,158,11,.3);border-radius:12px;font-size:.85rem;color:#fbbf24}
+.nm-row{padding:8px 10px;border-radius:10px;margin-bottom:6px;border-left:3px solid rgba(245,158,11,.5);background:rgba(245,158,11,.05)}
+.nm-row.pos{border-left-color:rgba(34,197,94,.5);background:rgba(34,197,94,.05)}
+.nm-row.scr{border-left-color:rgba(99,102,241,.5);background:rgba(99,102,241,.05)}
+.nm-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;color:#c4b5fd;font-weight:600;font-size:.75rem}
+.nm-type{font-size:.6rem;padding:2px 8px;border-radius:8px;background:rgba(168,85,247,.15);color:#b8a4d6}
+.nm-nums{display:flex;align-items:center;gap:8px;font-family:'Courier New',monospace}
+.nm-p{font-weight:800;font-size:1rem;color:#fbbf24;padding:4px 10px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:8px}
+.nm-a{font-weight:800;font-size:1rem;color:#4ade80;padding:4px 10px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);border-radius:8px}
+.nm-d{font-size:.7rem;color:#9580b8;font-weight:600;margin-left:auto}
+.dpos{margin-bottom:16px}
+.dpos-t{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+.dpos-l{font-size:.8rem;font-weight:700;color:#c4b5fd}
+.dpos-h{font-size:.65rem;color:#7c6a9e}
+.dgrid{display:flex;gap:4px;flex-wrap:wrap}
+.dcell{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-radius:10px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.15);min-width:44px}
+.dcell.tr{border-color:rgba(34,197,94,.3)}.dcell.tf{border-color:rgba(239,68,68,.3)}
+.dv{font-family:'Courier New',monospace;font-weight:800;font-size:1rem;color:#e9e0ff}
+.dbt{width:16px;height:30px;background:rgba(168,85,247,.1);border-radius:3px;display:flex;align-items:flex-end;overflow:hidden}
+.dbf{width:100%;background:linear-gradient(0deg,#a855f7,#6366f1);border-radius:3px}
+.df{font-size:.6rem;font-weight:700;color:#9580b8}
+.dt{font-size:.65rem}
+.pgrid{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:10px;background:linear-gradient(135deg,rgba(236,72,153,.1),rgba(168,85,247,.1));border:1px solid rgba(236,72,153,.25)}
+.pchip3{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(168,85,247,.1));border-color:rgba(99,102,241,.25)}
+.pt{font-family:'Courier New',monospace;font-weight:800;font-size:.9rem;color:#e9e0ff}
+.pf{font-size:.65rem;font-weight:600;color:#9580b8}
+.lb-row{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;margin-bottom:8px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15)}
+.lb-rank{font-size:1.2rem;min-width:32px;text-align:center}
+.lb-info{flex:1}
+.lb-name{font-size:.85rem;font-weight:700;color:#e9e0ff;margin-bottom:2px}
+.lb-stats{display:flex;gap:8px;flex-wrap:wrap;font-size:.65rem;color:#9580b8}
+.lb-sc{text-align:center}
+.lb-sv{font-size:1.1rem;font-weight:800;color:#c4b5fd}
+.lb-sl{font-size:.55rem;color:#7c6a9e;text-transform:uppercase}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.sitem{padding:12px;border-radius:12px;text-align:center;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2)}
+.sv{font-size:1.5rem;font-weight:800;color:#e9e0ff}
+.sl{font-size:.65rem;color:#9580b8;margin-top:2px}
+.sitem.se{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}.sitem.se .sv{color:#4ade80}
+.sitem.sn{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}.sitem.sn .sv{color:#fbbf24}
+.sacc{text-align:center;font-size:.75rem;color:#9580b8;padding:8px;background:rgba(168,85,247,.06);border-radius:8px}
+.sacc b{color:#c4b5fd}
+.roi-r{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:.8rem;color:#b8a4d6;border-bottom:1px solid rgba(168,85,247,.1)}
+.roi-r:last-child{border-bottom:none}
+.roi-v{font-weight:700;color:#e9e0ff}.roi-pos{color:#4ade80!important}.roi-neg{color:#f87171!important}
+.roi-btns{display:flex;gap:4px;margin-bottom:12px}
+.roi-b{padding:4px 12px;border-radius:8px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.1);color:#b8a4d6;font-size:.75rem;font-weight:600;cursor:pointer}
+.roi-b.ac{background:linear-gradient(135deg,rgba(168,85,247,.3),rgba(99,102,241,.3));border-color:var(--neon-purple);color:#e9e0ff;box-shadow:var(--glow-purple)}
+.mbadge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:10px;font-size:.7rem;font-weight:700}
+.mb-e{background:rgba(34,197,94,.2);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.mb-p{background:rgba(245,158,11,.2);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+.mb-n{background:rgba(107,114,128,.2);color:#9ca3af;border:1px solid rgba(107,114,128,.3)}
 .page-nav{display:flex;justify-content:center;gap:8px;margin-top:12px}
-.page-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:.8rem}
-.page-btn:hover{border-color:var(--neon)}
-.page-btn:disabled{opacity:.4;cursor:default}
-.page-btn.active{background:rgba(168,85,247,.3);border-color:var(--neon)}
-.page-info{color:var(--muted);font-size:.8rem;text-align:center;margin-top:8px}
-.loading{text-align:center;padding:40px;color:var(--muted)}
-.glow{animation:glow 2s ease-in-out infinite alternate}
-@keyframes glow{from{text-shadow:0 0 5px rgba(168,85,247,.5)}to{text-shadow:0 0 20px rgba(168,85,247,.8)}}
-@media(max-width:600px){.container{padding:10px}h1{font-size:1.4rem}.numbers{gap:6px}.num{min-width:48px;font-size:.9rem;padding:5px 8px}}
+.page-btn{padding:6px 14px;border-radius:8px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.1);color:#b8a4d6;font-size:.75rem;cursor:pointer}
+.page-btn:hover{background:rgba(168,85,247,.2)}
+.page-btn:disabled{opacity:.3;cursor:not-allowed}
+.empty{text-align:center;padding:32px 16px;color:#7c6a9e;font-size:.85rem}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(168,85,247,.3);border-radius:2px}
 </style>
 </head>
 <body>
-<div class="container">
-<h1 class="glow">🎰 GD Lotto 4D Dashboard</h1>
-<p class="subtitle">AI-Powered Predictions & Analysis</p>
-
-<div id="stats" class="stats-grid"></div>
-
-<div class="tabs">
-  <div class="tab active" onclick="showTab('predictions')">🔮 Predictions</div>
-  <div class="tab" onclick="showTab('results')">🏆 Latest Results</div>
-  <div class="tab" onclick="showTab('analysis')">📊 Analysis</div>
-  <div class="tab" onclick="showTab('history')">📜 Results History</div>
-  <div class="tab" onclick="showTab('pred-history')">🎯 Prediction History</div>
+<div class="app" id="app">
+<div class="header">
+<h1>🎰 GD Lotto 4D Predictor v2.0</h1>
+<div class="sub">AI-powered predictions · 5 strategies × 15 numbers · 75 daily picks</div>
+<div class="stats" id="stats"></div>
 </div>
-
-<div id="predictions" class="panel active"></div>
-<div id="results" class="panel"></div>
-<div id="analysis" class="panel"></div>
-<div id="history" class="panel"></div>
-<div id="pred-history" class="panel"></div>
+<div class="tabs" id="tabs"></div>
+<div id="content"></div>
 </div>
-
 <script>
-let DATA = null;
-let historyPage = 0;
-const PAGE_SIZE = 20;
-
-async function loadData() {
-  try {
-    const r = await fetch('data.json?' + Date.now());
-    DATA = await r.json();
-    render();
-  } catch(e) {
-    document.querySelector('.container').innerHTML += '<p class="loading">Failed to load data. Please try again later.</p>';
-  }
+let D={},tab='predictions',page={results:0,history:0,near:0},bet=1;
+const TABS=[
+{id:'predictions',label:'Predict',emoji:'🎯'},
+{id:'results',label:'Results',emoji:'🏆'},
+{id:'analysis',label:'Hot/Cold',emoji:'📊'},
+{id:'digits',label:'Digits',emoji:'🔢'},
+{id:'near',label:'Near',emoji:'🔶'},
+{id:'history',label:'History',emoji:'📜'},
+{id:'leaderboard',label:'Stats',emoji:'🏅'}
+];
+const STRATS={
+'Hot Frequency Fusion':{e:'🔥',t:'Frequency',tc:'tag-f',d:'Combines overall & recent frequency with recency weighting. Targets numbers trending hot in last 10-30 draws.'},
+'Overdue Reverse Engineering':{e:'⏰',t:'Gap Analysis',tc:'tag-g',d:'Targets overdue numbers using expected gap ratios + complement numbers (9-digit mirror).'},
+'Positional Markov Hybrid':{e:'🧮',t:'Pattern',tc:'tag-p',d:'Markov chain transition probabilities per digit position — predicts next likely digit based on last seen.'},
+'Ensemble Weighted Fusion':{e:'⚡',t:'Ensemble',tc:'tag-e',d:'Weighted combination of all strategies with multi-appearance bonus. Numbers picked by 2+ strategies get boosted.'},
+'ML Pattern Predictor':{e:'🤖',t:'Machine Learning',tc:'tag-m',d:'Statistical ML using digit sums, odd/even & high/low patterns filtered by positional frequency.'}
+};
+function gs(n){return STRATS[n]||{e:'✨',t:'Strategy',tc:'tag-p',d:''};}
+function fc(s){return s>=.7?'fh':s>=.5?'fm':'fl';}
+fetch('data.json').then(r=>r.json()).then(d=>{D=d;renderStats();renderTabs();render();}).catch(e=>{document.getElementById('content').innerHTML='<div class="empty">Failed to load data: '+e.message+'</div>';});
+function renderStats(){
+const r=D.results||[],p=D.predictions||[],nm=D.near_misses||[];
+document.getElementById('stats').innerHTML=
+`<div class="pill">📊 <b>${r.length}</b> draws</div>
+<div class="pill">📅 <b>${r[0]?.draw_date||'—'}</b></div>
+<div class="pill">🔮 <b>${[...new Set(p.map(x=>x.strategy_name))].length}</b> strategies</div>
+<div class="pill">🔶 <b>${nm.length}</b> near-misses</div>`;
 }
-
-function showTab(id) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  event.target.classList.add('active');
+function renderTabs(){
+document.getElementById('tabs').innerHTML=TABS.map(t=>
+`<button class="tab ${tab===t.id?'active':''}" onclick="setTab('${t.id}')">${t.emoji} ${t.label}</button>`
+).join('');
 }
-
-function confColor(v) {
-  if (v >= 0.7) return 'var(--green)';
-  if (v >= 0.5) return 'var(--gold)';
-  return 'var(--red)';
+function setTab(t){tab=t;renderTabs();render();}
+function render(){
+const c=document.getElementById('content');
+if(tab==='predictions')c.innerHTML=renderPredictions();
+else if(tab==='results')c.innerHTML=renderResults();
+else if(tab==='analysis')c.innerHTML=renderAnalysis();
+else if(tab==='digits')c.innerHTML=renderDigits();
+else if(tab==='near')c.innerHTML=renderNear();
+else if(tab==='history')c.innerHTML=renderHistory();
+else if(tab==='leaderboard')c.innerHTML=renderLeaderboard();
 }
-
-function strategyInfo(name) {
-  if (name.includes('Hot') || name.includes('Frequency')) return { icon: '🔥', badge: 'badge-freq', cat: 'Frequency', desc: 'Picks numbers appearing most often in recent draws' };
-  if (name.includes('Overdue') || name.includes('Reverse')) return { icon: '⏰', badge: 'badge-gap', cat: 'Gap-Based', desc: 'Finds numbers that haven\'t appeared in a long time' };
-  if (name.includes('Markov') || name.includes('Positional')) return { icon: '🧮', badge: 'badge-pattern', cat: 'Pattern', desc: 'Analyzes digit position probabilities using pattern chains' };
-  return { icon: '🎲', badge: 'badge-freq', cat: 'Mixed', desc: 'Combined strategy' };
+function renderPredictions(){
+const p=D.predictions||[];if(!p.length)return'<div class="empty">⏳ No predictions yet</div>';
+const dates=[...new Set(p.map(x=>x.target_date))];
+const latest=p.filter(x=>x.target_date===dates[0]);
+let h=`<div style="text-align:center"><div class="badge">🎯 Next Draw: ${dates[0]} · ${latest.length} strategies × 15 = ${latest.length*15} picks</div></div>`;
+latest.forEach(pr=>{
+const s=gs(pr.strategy_name),pct=Math.round(pr.confidence_score*100),nums=pr.predicted_numbers.split(',');
+h+=`<div class="card"><div class="sname">${s.e} ${pr.strategy_name}</div><span class="tag ${s.tc}">${s.t}</span><p class="desc">${s.d}</p>
+<div class="conf"><div class="conf-top"><span>Confidence</span><b>${pct}%</b></div><div class="bar"><div class="fill ${fc(pr.confidence_score)}" style="width:${pct}%"></div></div></div>
+<div class="nums">${nums.map(n=>`<div class="tile">${n}</div>`).join('')}</div></div>`;
+});
+return h;
 }
-
-function render() {
-  if (!DATA) return;
-
-  // Stats
-  document.getElementById('stats').innerHTML = `
-    <div class="stat-card"><div class="stat-val">${DATA.total_draws}</div><div class="stat-label">Total Draws</div></div>
-    <div class="stat-card"><div class="stat-val">${DATA.total_predictions}</div><div class="stat-label">Predictions</div></div>
-    <div class="stat-card"><div class="stat-val">${DATA.total_comparisons}</div><div class="stat-label">Comparisons</div></div>
-    <div class="stat-card"><div class="stat-val">${DATA.last_updated}</div><div class="stat-label">Last Updated</div></div>
-  `;
-
-  renderPredictions();
-  renderResults();
-  renderAnalysis();
-  renderHistory();
-  renderPredHistory();
+function renderResults(){
+const r=D.results||[],pp=20,pg=page.results,start=pg*pp,items=r.slice(start,start+pp);
+let h='';
+items.forEach(d=>{
+const sp=['special_a','special_b','special_c','special_d','special_e','special_f','special_g','special_h','special_i','special_j','special_k','special_l','special_m'].map(k=>d[k]).filter(v=>v&&v!=='----');
+const co=['consolation_n','consolation_o','consolation_p','consolation_q','consolation_r','consolation_s','consolation_t','consolation_u','consolation_v','consolation_w'].map(k=>d[k]).filter(v=>v&&v!=='----');
+h+=`<div class="card"><div class="date">📅 ${d.draw_date}</div>
+<div class="prize"><span class="prize-l">🥇</span><span class="prize-n p1">${d.prize_1st}</span></div>
+<div class="prize"><span class="prize-l">🥈</span><span class="prize-n p2">${d.prize_2nd}</span></div>
+<div class="prize"><span class="prize-l">🥉</span><span class="prize-n p3">${d.prize_3rd}</span></div>`;
+if(sp.length){h+=`<div class="sec-label">Special</div><div class="mini">${sp.map(n=>`<span class="mt">${n}</span>`).join('')}</div>`;}
+if(co.length){h+=`<div class="sec-label">Consolation</div><div class="mini">${co.map(n=>`<span class="mt">${n}</span>`).join('')}</div>`;}
+h+='</div>';
+});
+h+=`<div class="page-nav"><button class="page-btn" onclick="page.results--;render()" ${pg<=0?'disabled':''}>◀ Prev</button><span style="color:#9580b8;font-size:.8rem;padding:6px">${start+1}-${Math.min(start+pp,r.length)} of ${r.length}</span><button class="page-btn" onclick="page.results++;render()" ${start+pp>=r.length?'disabled':''}>Next ▶</button></div>`;
+return h;
 }
-
-function renderPredictions() {
-  const el = document.getElementById('predictions');
-  if (!DATA.predictions.length) { el.innerHTML = '<div class="card"><p style="color:var(--muted)">No predictions yet. First predictions will appear after the daily update.</p></div>'; return; }
-  
-  // Group by target date
-  const grouped = {};
-  DATA.predictions.forEach(p => {
-    if (!grouped[p.target_date]) grouped[p.target_date] = [];
-    grouped[p.target_date].push(p);
-  });
-
-  let html = '';
-  for (const [date, preds] of Object.entries(grouped)) {
-    html += `<div class="section-title">🎯 Predictions for ${date}</div>`;
-    preds.forEach(p => {
-      const info = strategyInfo(p.strategy_name);
-      const nums = p.predicted_numbers.split(',');
-      const conf = p.confidence_score;
-      html += `<div class="card">
-        <h3>${info.icon} ${p.strategy_name} <span class="badge ${info.badge}">${info.cat}</span></h3>
-        <div class="desc">${info.desc}</div>
-        <div class="confidence"><span>Confidence: ${(conf*100).toFixed(0)}%</span><div class="conf-bar"><div class="conf-fill" style="width:${conf*100}%;background:${confColor(conf)}"></div></div></div>
-        <div class="numbers">${nums.map(n => `<div class="num">${n}</div>`).join('')}</div>
-      </div>`;
-    });
-  }
-  el.innerHTML = html;
+function renderAnalysis(){
+const hot=D.frequency?.hot||[],cold=D.frequency?.cold||[];
+const mxH=hot[0]?.count||1,mxC=Math.max(...cold.map(c=>c.count),1);
+let h=`<div class="card"><div class="date">🔥 Hot Numbers <span style="font-size:.65rem;color:#9580b8;font-weight:400;margin-left:auto;float:right">Most frequent</span></div>`;
+hot.forEach(n=>{h+=`<div class="freq-r"><div class="freq-n">${n.number}</div><div class="freq-t"><div class="freq-fh" style="width:${n.count/mxH*100}%"></div></div><div class="freq-c">${n.count}×</div></div>`;});
+h+=`</div><div class="card"><div class="date">❄️ Cold Numbers <span style="font-size:.65rem;color:#9580b8;font-weight:400;margin-left:auto;float:right">Least frequent</span></div>`;
+cold.forEach(n=>{h+=`<div class="freq-r"><div class="freq-n">${n.number}</div><div class="freq-t"><div class="freq-fc" style="width:${n.count/mxC*100}%"></div></div><div class="freq-c">${n.count}×</div></div>`;});
+h+='</div>';return h;
 }
-
-function renderResults() {
-  const el = document.getElementById('results');
-  if (!DATA.latest_draw) { el.innerHTML = '<div class="card"><p style="color:var(--muted)">No results yet.</p></div>'; return; }
-  const d = DATA.latest_draw;
-  const specials = ['special_a','special_b','special_c','special_d','special_e','special_f','special_g','special_h','special_i','special_j','special_k','special_l','special_m'].map(k => d[k]).filter(Boolean);
-  const consolations = ['consolation_n','consolation_o','consolation_p','consolation_q','consolation_r','consolation_s','consolation_t','consolation_u','consolation_v','consolation_w'].map(k => d[k]).filter(Boolean);
-
-  el.innerHTML = `<div class="card">
-    <h3>🏆 Draw: ${d.draw_date}</h3>
-    <div class="prize gold"><span class="prize-label">1st</span><span class="prize-num">${d.prize_1st}</span></div>
-    <div class="prize silver"><span class="prize-label">2nd</span><span class="prize-num">${d.prize_2nd}</span></div>
-    <div class="prize bronze"><span class="prize-label">3rd</span><span class="prize-num">${d.prize_3rd}</span></div>
-    ${specials.length ? `<div class="section-title">⭐ Special</div><div class="special-grid">${specials.map(n=>`<span class="special-num">${n}</span>`).join('')}</div>` : ''}
-    ${consolations.length ? `<div class="section-title">🎫 Consolation</div><div class="special-grid">${consolations.map(n=>`<span class="special-num">${n}</span>`).join('')}</div>` : ''}
-  </div>`;
+function renderDigits(){
+const dd=D.digit_analysis||[],pp=D.pair_patterns||[];
+const posL=['Thousands','Hundreds','Tens','Ones'],ti=t=>t==='rising'?'📈':t==='falling'?'📉':'➡️',tc=t=>t==='rising'?'tr':t==='falling'?'tf':'';
+let h='<div class="card"><div class="date">🔢 Digit Position Analysis</div><p class="desc">Frequency of each digit (0-9) at each position. Trends show recent movement.</p>';
+for(let p=0;p<4;p++){
+const digits=dd.filter(d=>d.position===p);
+const mx=Math.max(...digits.map(d=>d.frequency),1);
+h+=`<div class="dpos"><div class="dpos-t"><span class="dpos-l">${posL[p]}</span><span class="dpos-h">Position ${p+1}</span></div><div class="dgrid">`;
+digits.forEach(d=>{h+=`<div class="dcell ${tc(d.trend)}"><div class="dv">${d.digit}</div><div class="dbt"><div class="dbf" style="height:${d.frequency/mx*100}%"></div></div><div class="df">${d.recent_frequency}</div><div class="dt">${ti(d.trend)}</div></div>`;});
+h+='</div></div>';
 }
-
-function renderAnalysis() {
-  const el = document.getElementById('analysis');
-  const maxHot = DATA.hot_numbers.length ? DATA.hot_numbers[0].count : 1;
-  const maxCold = DATA.cold_numbers.length ? Math.max(...DATA.cold_numbers.map(n=>n.count), 1) : 1;
-
-  let html = '<div class="card"><h3>🔥 Hot Numbers (Most Frequent)</h3>';
-  DATA.hot_numbers.forEach(n => {
-    html += `<div class="freq-item"><span class="freq-num" style="color:#f87171">${n.number}</span><div class="freq-bar"><div class="freq-fill hot" style="width:${(n.count/maxHot)*100}%"></div></div><span class="freq-count">${n.count}</span></div>`;
-  });
-  html += '</div><div class="card"><h3>❄️ Cold Numbers (Least Frequent)</h3>';
-  DATA.cold_numbers.forEach(n => {
-    html += `<div class="freq-item"><span class="freq-num" style="color:#38bdf8">${n.number}</span><div class="freq-bar"><div class="freq-fill cold" style="width:${(n.count/maxCold)*100}%"></div></div><span class="freq-count">${n.count}</span></div>`;
-  });
-  html += '</div>';
-  el.innerHTML = html;
+h+='</div>';
+const pairs=pp.filter(p=>p.pattern_type==='pair'),triples=pp.filter(p=>p.pattern_type==='triple');
+h+=`<div class="card"><div class="date">🔗 Hot Digit Pairs</div><div class="pgrid">${pairs.slice(0,15).map(p=>`<div class="pchip"><span class="pt">${p.pattern}</span><span class="pf">${p.frequency}×</span></div>`).join('')}</div></div>`;
+h+=`<div class="card"><div class="date">🔺 Hot Digit Triples</div><div class="pgrid">${triples.slice(0,15).map(p=>`<div class="pchip pchip3"><span class="pt">${p.pattern}</span><span class="pf">${p.frequency}×</span></div>`).join('')}</div></div>`;
+return h;
 }
-
-function renderHistory() {
-  const el = document.getElementById('history');
-  const draws = DATA.draws_history;
-  const totalPages = Math.ceil(draws.length / PAGE_SIZE);
-  const start = historyPage * PAGE_SIZE;
-  const page = draws.slice(start, start + PAGE_SIZE);
-
-  let html = `<div class="card"><h3>📜 All ${draws.length} Draw Results</h3>
-    <table><thead><tr><th>Date</th><th>1st 🥇</th><th>2nd 🥈</th><th>3rd 🥉</th></tr></thead><tbody>`;
-  page.forEach(d => {
-    html += `<tr><td>${d.draw_date}</td><td style="color:var(--gold);font-family:monospace;font-weight:700">${d.prize_1st}</td><td style="color:var(--silver);font-family:monospace;font-weight:700">${d.prize_2nd}</td><td style="color:var(--bronze);font-family:monospace;font-weight:700">${d.prize_3rd}</td></tr>`;
-  });
-  html += '</tbody></table>';
-  html += `<div class="page-info">Page ${historyPage+1} of ${totalPages} (${draws.length} draws)</div>`;
-  html += '<div class="page-nav">';
-  html += `<button class="page-btn" onclick="changePage(-1)" ${historyPage===0?'disabled':''}>← Prev</button>`;
-  html += `<button class="page-btn" onclick="changePage(1)" ${historyPage>=totalPages-1?'disabled':''}>Next →</button>`;
-  html += '</div></div>';
-  el.innerHTML = html;
+function renderNear(){
+const nm=D.near_misses||[];if(!nm.length)return'<div class="empty">🎯 No near-misses yet</div>';
+const grouped={};nm.forEach(n=>{if(!grouped[n.target_date])grouped[n.target_date]=[];grouped[n.target_date].push(n);});
+let h=`<div class="nm-sum">🔶 Total near-misses: <b>${nm.length}</b></div>`;
+Object.entries(grouped).forEach(([date,misses])=>{
+const se=n=>n.toLowerCase().includes('hot')?'🔥':n.toLowerCase().includes('overdue')?'⏰':n.toLowerCase().includes('markov')?'🧮':n.toLowerCase().includes('ensemble')?'⚡':n.toLowerCase().includes('ml')?'🤖':'✨';
+h+=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div class="date" style="margin-bottom:0">📅 ${date}</div><span class="mbadge mb-p">${misses.length} near-miss${misses.length>1?'es':''}</span></div>`;
+misses.forEach(m=>{
+const cls=m.miss_type.includes('positional')?'pos':m.miss_type.includes('scramble')?'scr':'';
+h+=`<div class="nm-row ${cls}"><div class="nm-hdr"><span>${se(m.strategy_name)} ${m.strategy_name.split(' ').slice(0,2).join(' ')}</span><span class="nm-type">${m.miss_type}</span></div><div class="nm-nums"><span class="nm-p">${m.predicted}</span><span style="color:#7c6a9e">≈</span><span class="nm-a">${m.actual}</span><span class="nm-d">${m.digits_matched}d</span></div></div>`;
+});
+h+='</div>';
+});
+return h;
 }
-
-function changePage(dir) {
-  const totalPages = Math.ceil(DATA.draws_history.length / PAGE_SIZE);
-  historyPage = Math.max(0, Math.min(totalPages-1, historyPage + dir));
-  renderHistory();
+function renderHistory(){
+const c=D.comparisons||[];if(!c.length)return'<div class="empty">📊 No comparison history yet</div>';
+let h='';
+c.forEach(comp=>{
+let preds={},acts=[];try{preds=JSON.parse(comp.predictions_json)}catch{}try{acts=JSON.parse(comp.actual_results_json)}catch{}
+const actSet=new Set(acts);
+h+=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div class="date" style="margin-bottom:0">📅 ${comp.target_date}</div><div style="display:flex;gap:6px">${comp.exact_matches>0?`<span class="mbadge mb-e">✅ ${comp.exact_matches} exact</span>`:''}${comp.partial_matches>0?`<span class="mbadge mb-p">🔄 ${comp.partial_matches} perm</span>`:''}</div></div>`;
+if(acts.length){h+=`<div class="sec-label">Winning Numbers</div><div class="mini">${acts.slice(0,23).map(n=>`<span class="mt mt-g">${n}</span>`).join('')}</div>`;}
+Object.entries(preds).forEach(([strat,nums])=>{
+const se=strat.toLowerCase().includes('hot')?'🔥':strat.toLowerCase().includes('overdue')?'⏰':strat.toLowerCase().includes('markov')?'🧮':strat.toLowerCase().includes('ensemble')?'⚡':strat.toLowerCase().includes('ml')?'🤖':'✨';
+h+=`<div style="margin-top:8px;padding-left:8px;border-left:2px solid rgba(168,85,247,.2);margin-left:4px"><div style="font-size:.8rem;font-weight:600;color:#c4b5fd;margin-bottom:4px">${se} ${strat}</div><div class="mini">${(Array.isArray(nums)?nums:[]).map(n=>`<span class="mt ${actSet.has(n)?'mt-m':''}">${n}</span>`).join('')}</div></div>`;
+});
+h+='</div>';
+});
+return h;
 }
-
-function renderPredHistory() {
-  const el = document.getElementById('pred-history');
-  const preds = DATA.predictions;
-  const comps = DATA.comparisons;
-
-  let html = '';
-
-  // Comparisons
-  if (comps.length) {
-    html += '<div class="card"><h3>🎯 Prediction vs Actual Results</h3><table><thead><tr><th>Date</th><th>Exact</th><th>Partial</th><th>Compared</th></tr></thead><tbody>';
-    comps.forEach(c => {
-      html += `<tr><td>${c.target_date}</td><td>${c.exact_matches > 0 ? `<span class="match-badge">${c.exact_matches} match${c.exact_matches>1?'es':''}</span>` : '<span class="no-match">0</span>'}</td><td>${c.partial_matches || 0}</td><td style="color:var(--muted);font-size:.75rem">${c.compared_at || '-'}</td></tr>`;
-    });
-    html += '</tbody></table></div>';
-  }
-
-  // All predictions grouped by date
-  const grouped = {};
-  preds.forEach(p => {
-    if (!grouped[p.target_date]) grouped[p.target_date] = [];
-    grouped[p.target_date].push(p);
-  });
-
-  html += '<div class="card"><h3>📋 All Predictions</h3>';
-  for (const [date, ps] of Object.entries(grouped)) {
-    html += `<div class="section-title">📅 Target: ${date}</div>`;
-    ps.forEach(p => {
-      const info = strategyInfo(p.strategy_name);
-      const nums = p.predicted_numbers.split(',');
-      html += `<div style="margin-bottom:12px;padding:8px;background:var(--card2);border-radius:8px">
-        <div style="font-size:.85rem;font-weight:600;color:var(--neon2)">${info.icon} ${p.strategy_name} <span class="badge ${info.badge}">${info.cat}</span></div>
-        <div class="numbers" style="margin-top:6px">${nums.map(n => `<div class="num" style="font-size:.85rem;min-width:44px;padding:4px 8px">${n}</div>`).join('')}</div>
-        <div style="font-size:.7rem;color:var(--muted);margin-top:4px">Confidence: ${(p.confidence_score*100).toFixed(0)}% · Created: ${p.created_at}</div>
-      </div>`;
-    });
-  }
-  if (!preds.length) html += '<p style="color:var(--muted)">No prediction history yet.</p>';
-  html += '</div>';
-
-  el.innerHTML = html;
+function renderLeaderboard(){
+const perf=D.strategy_performance||[],comp=D.comparisons||[],r=D.results||[];
+const totE=perf.reduce((s,p)=>s+p.exact_matches,0),totN=perf.reduce((s,p)=>s+p.near_misses,0),totP=perf.reduce((s,p)=>s+p.total_predictions,0);
+const se=n=>n.toLowerCase().includes('hot')?'🔥':n.toLowerCase().includes('overdue')?'⏰':n.toLowerCase().includes('markov')?'🧮':n.toLowerCase().includes('ensemble')?'⚡':n.toLowerCase().includes('ml')?'🤖':'✨';
+let h='<div class="card"><div class="date">🏅 Strategy Leaderboard</div>';
+if(!perf.length)h+='<div class="empty" style="padding:16px">🏅 Leaderboard populates after comparisons</div>';
+else perf.forEach((p,i)=>{
+const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+h+=`<div class="lb-row"><div class="lb-rank">${medal}</div><div class="lb-info"><div class="lb-name">${se(p.strategy_name)} ${p.strategy_name}</div><div class="lb-stats"><span>🎯 ${p.exact_matches} exact</span><span>🔶 ${p.near_misses} near</span><span>📊 ${p.total_predictions} picks</span></div></div><div class="lb-sc"><div class="lb-sv">${p.score.toFixed(1)}</div><div class="lb-sl">score</div></div></div>`;
+});
+h+='</div>';
+h+=`<div class="card"><div class="date">📊 Performance Summary</div><div class="sgrid"><div class="sitem"><div class="sv">${r.length}</div><div class="sl">Total Draws</div></div><div class="sitem se"><div class="sv">${totE}</div><div class="sl">Exact Matches</div></div><div class="sitem sn"><div class="sv">${totN}</div><div class="sl">Near Misses</div></div><div class="sitem"><div class="sv">${totP}</div><div class="sl">Total Predictions</div></div></div>`;
+if(comp.length)h+=`<div class="sacc">Hit Rate: <b>${totP?(totE/totP*100).toFixed(2):'0.00'}%</b> | Near-Miss Rate: <b>${totP?(totN/totP*100).toFixed(2):'0.00'}%</b></div>`;
+h+='</div>';
+// ROI
+const prize=2500,spent=comp.length*bet*75,won=totE*prize*bet,roi=spent?(won-spent)/spent*100:0;
+h+=`<div class="card"><div class="date">💰 ROI Simulator</div><p class="desc">Simulate returns based on GD Lotto 4D Big prize (~RM2,500 per RM1).</p>
+<div class="roi-btns">${[1,2,5,10].map(a=>`<button class="roi-b ${bet===a?'ac':''}" onclick="bet=${a};render()">RM${a}</button>`).join('')}</div>
+<div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px">
+<div class="roi-r"><span>Days tracked:</span><span class="roi-v">${comp.length}</span></div>
+<div class="roi-r"><span>Total spent (75 × RM${bet}):</span><span class="roi-v roi-neg">RM${spent.toLocaleString()}</span></div>
+<div class="roi-r"><span>Total won (${totE} × RM${(prize*bet).toLocaleString()}):</span><span class="roi-v ${won?'roi-pos':''}">${won?'RM'+won.toLocaleString():'RM0'}</span></div>
+<div class="roi-r" style="font-weight:700;font-size:.9rem"><span>Net P&L:</span><span class="roi-v ${won-spent>=0?'roi-pos':'roi-neg'}">${won-spent>=0?'+':''}RM${(won-spent).toLocaleString()}</span></div>
+<div class="roi-r" style="font-weight:700;font-size:.9rem"><span>ROI:</span><span class="roi-v ${roi>=0?'roi-pos':'roi-neg'}">${roi>=0?'+':''}${roi.toFixed(1)}%</span></div>
+</div></div>`;
+return h;
 }
-
-loadData();
 </script>
 </body>
 </html>
