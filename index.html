@@ -117,7 +117,7 @@ body{background:var(--dark-bg);color:#e2d9f3;font-family:-apple-system,BlinkMacS
 .page-btn:disabled{opacity:.3;cursor:not-allowed}
 .empty{text-align:center;padding:32px 16px;color:#7c6a9e;font-size:.85rem}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(168,85,247,.3);border-radius:2px}
-</style>
+.tag-b{background:rgba(251,191,36,.2);color:#fde68a;border:1px solid rgba(251,191,36,.3)}</style>
 </head>
 <body>
 <div class="app" id="app">
@@ -144,7 +144,7 @@ const STRATS={
 'Hot Frequency Fusion':{e:'🔥',t:'Frequency',tc:'tag-f',d:'Combines overall & recent frequency with recency weighting. Targets numbers trending hot in last 10-30 draws.'},
 'Overdue Reverse Engineering':{e:'⏰',t:'Gap Analysis',tc:'tag-g',d:'Targets overdue numbers using expected gap ratios + complement numbers (9-digit mirror).'},
 'Positional Markov Hybrid':{e:'🧮',t:'Pattern',tc:'tag-p',d:'Markov chain transition probabilities per digit position — predicts next likely digit based on last seen.'},
-'Ensemble Weighted Fusion':{e:'⚡',t:'Ensemble',tc:'tag-e',d:'Weighted combination of all strategies with multi-appearance bonus. Numbers picked by 2+ strategies get boosted.'},
+'Bayesian Probability':{e:'🎲',t:'Bayesian',tc:'tag-b',d:'Bayesian inference with Laplace-smoothed posteriors & recency weighting. Self-learning.'},'Ensemble Weighted Fusion':{e:'⚡',t:'Ensemble',tc:'tag-e',d:'Weighted combination of all strategies with multi-appearance bonus. Numbers picked by 2+ strategies get boosted.'},
 'ML Pattern Predictor':{e:'🤖',t:'Machine Learning',tc:'tag-m',d:'Statistical ML using digit sums, odd/even & high/low patterns filtered by positional frequency.'}
 };
 function gs(n){return STRATS[n]||{e:'✨',t:'Strategy',tc:'tag-p',d:''};}
@@ -235,7 +235,7 @@ const nm=D.near_misses||[];if(!nm.length)return'<div class="empty">🎯 No near-
 const grouped={};nm.forEach(n=>{if(!grouped[n.target_date])grouped[n.target_date]=[];grouped[n.target_date].push(n);});
 let h=`<div class="nm-sum">🔶 Total near-misses: <b>${nm.length}</b></div>`;
 Object.entries(grouped).forEach(([date,misses])=>{
-const se=n=>n.toLowerCase().includes('hot')?'🔥':n.toLowerCase().includes('overdue')?'⏰':n.toLowerCase().includes('markov')?'🧮':n.toLowerCase().includes('ensemble')?'⚡':n.toLowerCase().includes('ml')?'🤖':'✨';
+const se=n=>n.toLowerCase().includes('hot')?'🔥':n.toLowerCase().includes('overdue')?'⏰':n.toLowerCase().includes('markov')?'🧮':n.toLowerCase().includes('bayesian')?'🎲':n.toLowerCase().includes('ensemble')?'⚡':n.toLowerCase().includes('ml')?'🤖':'✨';
 h+=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div class="date" style="margin-bottom:0">📅 ${date}</div><span class="mbadge mb-p">${misses.length} near-miss${misses.length>1?'es':''}</span></div>`;
 misses.forEach(m=>{
 const cls=m.miss_type.includes('positional')?'pos':m.miss_type.includes('scramble')?'scr':'';
@@ -254,7 +254,7 @@ const actSet=new Set(acts);
 h+=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div class="date" style="margin-bottom:0">📅 ${comp.target_date}</div><div style="display:flex;gap:6px">${comp.exact_matches>0?`<span class="mbadge mb-e">✅ ${comp.exact_matches} exact</span>`:''}${comp.partial_matches>0?`<span class="mbadge mb-p">🔄 ${comp.partial_matches} perm</span>`:''}</div></div>`;
 if(acts.length){h+=`<div class="sec-label">Winning Numbers</div><div class="mini">${acts.slice(0,23).map(n=>`<span class="mt mt-g">${n}</span>`).join('')}</div>`;}
 Object.entries(preds).forEach(([strat,nums])=>{
-const se=strat.toLowerCase().includes('hot')?'🔥':strat.toLowerCase().includes('overdue')?'⏰':strat.toLowerCase().includes('markov')?'🧮':strat.toLowerCase().includes('ensemble')?'⚡':strat.toLowerCase().includes('ml')?'🤖':'✨';
+const se=strat.toLowerCase().includes('hot')?'🔥':strat.toLowerCase().includes('overdue')?'⏰':strat.toLowerCase().includes('markov')?'🧮':strat.toLowerCase().includes('bayesian')?'🎲':n.toLowerCase().includes('ensemble')?'⚡':strat.toLowerCase().includes('ml')?'🤖':'✨';
 h+=`<div style="margin-top:8px;padding-left:8px;border-left:2px solid rgba(168,85,247,.2);margin-left:4px"><div style="font-size:.8rem;font-weight:600;color:#c4b5fd;margin-bottom:4px">${se} ${strat}</div><div class="mini">${(Array.isArray(nums)?nums:[]).map(n=>`<span class="mt ${actSet.has(n)?'mt-m':''}">${n}</span>`).join('')}</div></div>`;
 });
 h+='</div>';
@@ -264,7 +264,7 @@ return h;
 function renderLeaderboard(){
 const perf=D.strategy_performance||[],comp=D.comparisons||[],r=D.results||[];
 const totE=perf.reduce((s,p)=>s+p.exact_matches,0),totN=perf.reduce((s,p)=>s+p.near_misses,0),totP=perf.reduce((s,p)=>s+p.total_predictions,0);
-const se=n=>n.toLowerCase().includes('hot')?'🔥':n.toLowerCase().includes('overdue')?'⏰':n.toLowerCase().includes('markov')?'🧮':n.toLowerCase().includes('ensemble')?'⚡':n.toLowerCase().includes('ml')?'🤖':'✨';
+const se=n=>n.toLowerCase().includes('hot')?'🔥':n.toLowerCase().includes('overdue')?'⏰':n.toLowerCase().includes('markov')?'🧮':n.toLowerCase().includes('bayesian')?'🎲':n.toLowerCase().includes('ensemble')?'⚡':n.toLowerCase().includes('ml')?'🤖':'✨';
 let h='<div class="card"><div class="date">🏅 Strategy Leaderboard</div>';
 if(!perf.length)h+='<div class="empty" style="padding:16px">🏅 Leaderboard populates after comparisons</div>';
 else perf.forEach((p,i)=>{
